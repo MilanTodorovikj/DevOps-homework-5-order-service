@@ -45,16 +45,16 @@ jobs:
 
       - name: Wait for User-Service to be Ready
         run: |
-          for ($i=1; $i -le 10; $i++) {
-            $status = kubectl get pods -l app=user-service --field-selector=status.phase=Running
-            if ($status -match "user-service") {
-              echo "User-Service is running."
+          for ($i = 1; $i -le 10; $i++) {
+            $status = kubectl get pods -l app=user-service-prod --field-selector=status.phase=Running -o jsonpath='{.items[0].status.phase}'
+            if ($status -eq "Running") {
+              Write-Host "User-Service is running."
               exit 0
             }
-            echo "Waiting for User-Service to be ready..."
+            Write-Host "Waiting for User-Service to be ready..."
             Start-Sleep -Seconds 10
           }
-          echo "User-Service is NOT running! Exiting..."
+          Write-Host "User-Service is NOT running! Exiting..."
           exit 1
 
       - name: Build Docker image for order-service
