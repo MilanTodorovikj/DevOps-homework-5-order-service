@@ -1,0 +1,67 @@
+name: CI/CD for Order-Service (Dev)
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build-test:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Build and run tests
+        run: mvn clean package
+
+  deploy:
+    needs: build-test
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Build JAR for deploy
+        run: mvn clean package
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Wait for User-Service to be Ready
+        run: |
+          for ($i=1; $i -le 10; $i++) {
+            $status = kubectl get pods -l app=user-service-dev --field-selector=status.phase=Running
+            if ($status -match "user-service-dev") {
+              echo "User-Service is running."
+              exit 0
+            }
+            echo "Waiting for User-Service to be ready..."
+            Start-Sleep -Seconds 10
+          }
+          echo "User-Service is NOT running! Exiting..."
+          exit 1
+
+      - name: Build Docker image for order-service
+        run: docker build -t order-service:dev .
+
+      - name: Configure Kubernetes
+        run: |
+          echo "${{ secrets.KUBECONFIG_CONTENT }}" > $HOME/.kube/config
+          kubectl config use-context minikube
+          kubectl get nodes
+
+      - name: Deploy to Minikube
+        run: kubectl apply -f k8s/order-service-dev-deployment.yaml
