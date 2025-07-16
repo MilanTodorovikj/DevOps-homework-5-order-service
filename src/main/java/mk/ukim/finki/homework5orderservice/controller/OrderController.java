@@ -18,7 +18,8 @@ public class OrderController {
     private final List<Order> orders = List.of(
             new Order(1L, "Laptop", 1L),
             new Order(2L, "Phone", 2L),
-            new Order(3L, "PC", 1L)
+            new Order(3L, "PC", 1L),
+            new Order(4L, "TV", 2L)
     );
 
     @GetMapping("/{id}")
