@@ -64,4 +64,7 @@ jobs:
           kubectl get nodes
 
       - name: Deploy to Minikube
-        run: kubectl apply -f k8s/order-service-dev-deployment.yaml
+        run: |
+          kubectl delete service order-service-dev --ignore-not-found
+          kubectl delete deployment order-service-deployment-dev --ignore-not-found
+          kubectl apply -f k8s/order-service-dev-deployment.yaml
