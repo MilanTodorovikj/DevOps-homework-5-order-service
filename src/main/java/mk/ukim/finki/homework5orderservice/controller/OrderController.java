@@ -19,7 +19,8 @@ public class OrderController {
             new Order(1L, "Laptop", 1L),
             new Order(2L, "Phone", 2L),
             new Order(3L, "PC", 1L),
-            new Order(4L, "TV", 2L)
+            new Order(4L, "TV", 2L),
+            new Order(5L, "Smartwatch", 2L)
     );
 
     @GetMapping("/{id}")
